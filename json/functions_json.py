@@ -1,19 +1,101 @@
 #-----------------------------------------
+#----------LIBRARIES FOR FUNCTIONS--------
+#-----------------------------------------
+import json
+import pandas as pd
+import math
+
+#-----------------------------------------
 #----------Extracting from JSON-----------
 #-----------------------------------------
+def extract_json_data(data:json):
+    """Generates dataframes for: 
+    strata geometry (e.g. xyz coordinates of nodes), 
+    materials data (e.g. c', phi'), 
+    slope results (e.g. slip circles, factor of safety)
+    Returns a pandas dataframe for each of the above.
+    NB. Contains functions.
+    """
+    #Strata data
+    from functions_json import get_nested_data
+    ##Iterate through "Nodes"
+    iter_nodes = len(data["Node"])
+    node_xyz = get_nested_data(data, "Node", "Point", iter_nodes)
+    ##Iterate through "Members"
+    iter_member = len(data["Member"])
+    stratum_nodes = get_nested_data(data,"Member", "Topo", iter_member, "Name", "Member")
+    stratum_name = get_nested_data(data,"Member", "Name", iter_member, "Name", "Member")
+
+    from functions_json import get_stratum_nodes_int
+    stratum_nodes_int_list = get_stratum_nodes_int(stratum_nodes)
+    
+    from functions_json import get_stratum_nodes_xyz
+    stratum_xyz = get_stratum_nodes_xyz(stratum_nodes_int_list, node_xyz)
+    stratum_geometry = list(zip(stratum_name, stratum_xyz))
+    stratum_geometry_df = pd.DataFrame(stratum_geometry, columns =["Name", "xyz"])
+
+    #Material data
+    ##Iterate through "SlopeMaterials"
+    iter_materials = len(data["RunData"][0]["SlopeMaterials"])
+    material_data = [
+        data["RunData"][0]["SlopeMaterials"][i] for i in range(iter_materials)
+        ]   
+    material_data_df = pd.DataFrame(material_data)
+
+    #Slope results data
+    ##Iterate through "Slope results"
+    from functions_json import slope_results_df
+    iter_results = len(data["RunData"][0]["Slope results"])
+    result_keys = ["SlipWeight", "X", "Y", "Factor", "Disturbing", "Restoring", "Points"]
+    slope_output_df = slope_results_df(data, iter_results, result_keys)
+
+
+    return stratum_geometry_df, material_data_df, slope_output_df
+
+
+#-----------------------------------------
+
+## FUNCTION TO IMPORT THE JSON FILE
+def get_json_data(file_name:str, dir:str):
+    """Returns JSON data from the file in a format which is ready to ingest in python. 
+    Uses 'json.loads()'. 
+    Requires the following library:
+            json
+    Inputs:
+    file_name (str): file name of the json file (no backslash at beginning)
+    dir (str):     
+    """
+    f = dir + "\\" + file_name
+    fo = open(f)
+    # Read data from file
+    data = json.loads(fo.read())
+
+    return data
+
+
 
 ## FUNCTION TO EXTRACT DATA FROM A NESTED DICTIONARY
-def get_nested_data(data, level1_name, level2_name, iter_range):
+def get_nested_data(data:json, level1_name:str, level2_name:str, iter_range:int, child=None, parent=None):
     """Extracts a list of nested data, two levels deep
     data: a unloaded json file (e.g. data = json.loads(fo.read()))
     Returns a list.
-    """
-    data_list = [data[level1_name][i][level2_name] for i in range(iter_range) 
+    child: optional -- allows filtering of data
+    parent: optional -- allows filtering of data
+    E.g. stratum_nodes = [
+    data["Member"][i]["Topo"] for i in range(iter_member) 
+    if "Name" in data["Member"][i]
     ]
+    """
+    if child != None and parent != None:
+            data_list = [data[level1_name][i][level2_name] for i in range(iter_range)
+    if child in data[parent][i] 
+    ]        
+    elif (child != None and parent == None) or (child == None and parent != None):
+        KeyError("Expected 2 arguments (for 'child' and 'parent'). Got only 1.") 
+    else:    
+        data_list = [data[level1_name][i][level2_name] for i in range(iter_range)] 
+    
     return data_list
-
-#print(get_nested_data("Node", "Point", iter_nodes))
-#print(get_nested_data.__doc__)
 
 
 ## FUNCTION TO CONVERT STRATUM NODES TO LIST OF INTEGERS
@@ -65,7 +147,6 @@ def slope_results_df(data, iter_results, result_keys):
     iter_results: number of slope results to iterate through
     result_keys: list of strings of dictionary keys to extract data from (e.g. ["SlipWeight", "Factor", "Disturbing", "Restoring", "Points"])
     """
-    import pandas as pd
     results_data = []
     for i in range(iter_results):
         if data["RunData"][0]["Slope results"][i]["Radius"] > 0:
@@ -93,9 +174,10 @@ def to_hex_code(oasys_colour_code):
 def rgbint_to_rgb(oasys_colour_code):
     """Returns the RGB colour code from the Oasys Slope colour code (RGB-int)
     Converts RGB-int to RGB.
+    Requires the following libraries:
+        import math
     oasys_colour_code: RGB-int code e.g. SlopeMaterials > "RGBStratum": 14745599
     """
-    import math
     b = math.floor((oasys_colour_code/65536))
     g = math.floor((oasys_colour_code%65536)/256)
     r = (oasys_colour_code%65536)-(g*256)
@@ -112,10 +194,11 @@ def rgb_to_hex(rgb):
 def rgbint_to_hex(oasys_colour_code):
     """Returns the hexideciamal representation of the Oasys Slope colour code (RGB-int)
     Converts RGB-int to hex.
+    Requires the following libraries:
+        import math
     oasys_colour_code: RGB-int code e.g. SlopeMaterials > "RGBStratum": 14745599
     output: hex e.g. #ffffe0
     """
-    import math
     b = math.floor((oasys_colour_code/65536))
     g = math.floor((oasys_colour_code%65536)/256)
     r = (oasys_colour_code%65536)-(g*256)

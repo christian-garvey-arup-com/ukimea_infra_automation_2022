@@ -1,14 +1,21 @@
-
-# FUNCTION TO EXPORT PLOTTING FIGURE AS URI
+#-----------------------------------------
+#----------LIBRARIES FOR FUNCTIONS--------
+#-----------------------------------------
 from io import BytesIO
 import base64
 import matplotlib.pyplot as plt
-def fig_to_uri(in_fig, close_all=True, **save_args):
-    # type: (plt.Figure) -> str
-    """
-    Save a figure as a URI
-    :param in_fig:
-    :return:
+
+
+
+
+# FUNCTION TO EXPORT PLOTTING FIGURE AS URI
+def fig_to_uri(in_fig:str, close_all=True, **save_args):
+    """Returns the URI for a matplotlib.pyplot figure. 
+    The 'in_fig' argument is in the form e.g. " in_fig = plt.<Figure/subplot()>"
+    Requires the following libraries: 
+        from io import BytesIO
+        import base64
+        import matplotlib.pyplot as plt
     """
     out_img = BytesIO()
     in_fig.savefig(out_img, format='png', **save_args)

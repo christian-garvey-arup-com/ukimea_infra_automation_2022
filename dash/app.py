@@ -86,10 +86,9 @@ def fig_to_uri(in_fig, close_all=True, **save_args):
 
 import sys
 sys.path.append('C:/Users/christian.garvey/OneDrive - Arup/01 Documents/01-07 Digital/Python/ukimea-automation-training-2022/Individual_project/individual_project_cgarvey/json/')
-import extract_data_from_json 
-#print(extract_data_from_json.stratum_geometry_df)
+import extract_data_from_json
+df = extract_data_from_json.slope_output_df
 
-df = extract_data_from_json.results_data_df
 factor_min = 0 #math.floor(df['Factor'].min())
 factor_max = math.ceil(df['Factor'].max())
 
@@ -102,16 +101,6 @@ app = dash.Dash(__name__)
 app.layout = html.Div([
     #dcc.Graph(id='mpl-graph-with-slider', figure=plotly_fig),
     html.Div([html.Img(id = 'mpl-graph', src = '')]),
-    # dcc.Slider(
-    #     id='factor-slider',
-    #     #min=df['Factor'].min(),
-    #     min = factor_min,
-    #     #max=df['Factor'].max() if df['Factor'].max() < 5 else 5,
-    #     max = factor_max,
-    #     value=df['Factor'].max(),
-    #     marks = {str(i): str(i) for i in np.arange(factor_min,factor_max,0.5)}
-    #     #step=0.2
-    # ), 
     dcc.Input(id='factor_input_lwr', value=factor_max, type="number"),
     dcc.Input(id='factor_input_uppr', value=factor_max, type="number")
 ])
@@ -145,7 +134,7 @@ def update_figure(input_lwr_value, input_uppr_value):
     ax.set_ylim([-5,50])
     ax.scatter(centre_points_x, y=centre_points_y)
     ax.set_title("Showing slip circles with a Factor between: \n" + str(input_lwr_value) + " and " + str(input_uppr_value))
-    #plt.subplot(scatter(x=centre_points_x, y=centre_points_y)
+    
     
     # fig = plt.patches.Arc() 
     #     data=[go.matplotlib [0,1,2,3,4])
