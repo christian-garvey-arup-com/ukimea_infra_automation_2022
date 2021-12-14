@@ -2,5 +2,21 @@ certifi==2021.10.8
 wincertstore==0.2
 
 os
+numpy
+import matplotlib.pyplot as plt
 json
-pandas
+pandas as pd
+dash
+math
+dash_bootstrap_components as dbc
+
+import dash
+from dash import dcc
+from dash import html
+from dash.dependencies import Input, Output
+from dash import dash_table as dt
+import plotly.express as px
+import pandas as pd
+
+from io import BytesIO
+import base64

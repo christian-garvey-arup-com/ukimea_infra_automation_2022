@@ -13,7 +13,7 @@ def get_nested_data(data, level1_name, level2_name, iter_range):
     return data_list
 
 #print(get_nested_data("Node", "Point", iter_nodes))
-print(get_nested_data.__doc__)
+#print(get_nested_data.__doc__)
 
 
 ## FUNCTION TO CONVERT STRATUM NODES TO LIST OF INTEGERS
@@ -28,6 +28,8 @@ def get_stratum_nodes_int(stratum_nodes):
         stratum_nodes_list = stratum_nodes[index].split()
         map_object = map(int, stratum_nodes_list)
         stratum_nodes_int = list(map_object)
+        # add the start node to the end of the list -- close the stratum polygon
+        stratum_nodes_int.append(stratum_nodes_int[0])
         stratum_nodes_int_list.append(stratum_nodes_int)
     # return a list of nodes as integers for each stratum (i.e. each string of node indices from stratum_nodes)
     return stratum_nodes_int_list
@@ -72,3 +74,54 @@ def slope_results_df(data, iter_results, result_keys):
             results_data.append(results_dict_reduced)
     results_data_df = pd.DataFrame(results_data)
     return results_data_df
+
+
+
+## FUNCTION TO TRANSFORM OASYS COLOUR CODE TO HTML
+def to_hex_code(oasys_colour_code):
+    """Returns the hexadecmial colour code from the Oasys Slope colour code (represented as an RGB-int code).
+    Converts RGB-int to hexadecimal.
+    oasys_colour_code: RGB-int code e.g. SlopeMaterials > "RGBStratum": 14745599
+    """
+    hex_string = (hex(oasys_colour_code))
+    # remove "0x" from start of hex_string, and add a "#" 
+    hex_string = "#" + hex_string[2:]
+    return hex_string
+
+
+## FUNCTIONS TO TRANSFORM OASYS COLOUR CODE TO HEX (FOR HTML)
+def rgbint_to_rgb(oasys_colour_code):
+    """Returns the RGB colour code from the Oasys Slope colour code (RGB-int)
+    Converts RGB-int to RGB.
+    oasys_colour_code: RGB-int code e.g. SlopeMaterials > "RGBStratum": 14745599
+    """
+    import math
+    b = math.floor((oasys_colour_code/65536))
+    g = math.floor((oasys_colour_code%65536)/256)
+    r = (oasys_colour_code%65536)-(g*256)
+    return r,g,b
+#print(rgbint_to_rgb(14745599))
+
+def rgb_to_hex(rgb):
+    """Returns the hexadecimal representation of the RGB(r,g,b) colour code
+    rgb: tuple of RGB values e.g. (255,255,224)
+    """
+    hex_string = '#%02x%02x%02x' % rgb
+    return hex_string
+
+def rgbint_to_hex(oasys_colour_code):
+    """Returns the hexideciamal representation of the Oasys Slope colour code (RGB-int)
+    Converts RGB-int to hex.
+    oasys_colour_code: RGB-int code e.g. SlopeMaterials > "RGBStratum": 14745599
+    output: hex e.g. #ffffe0
+    """
+    import math
+    b = math.floor((oasys_colour_code/65536))
+    g = math.floor((oasys_colour_code%65536)/256)
+    r = (oasys_colour_code%65536)-(g*256)
+    rgb = (r,g,b)
+    hex_string = '#%02x%02x%02x' % rgb
+    return hex_string
+
+# oasys_colour_code = 14745599 # should be: #ffffe0
+# print(rgbint_to_hex(oasys_colour_code))

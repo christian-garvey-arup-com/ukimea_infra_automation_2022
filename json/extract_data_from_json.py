@@ -13,8 +13,9 @@ import pandas as pd
 #-----------------------------
 # Get file path
 cwd = os.getcwd()
-dir = cwd
+#dir = cwd
 file_name = "Slope01_output.json" 
+dir = r"C:\Users\christian.garvey\OneDrive - Arup\01 Documents\01-07 Digital\Python\ukimea-automation-training-2022\Individual_project\individual_project_cgarvey"
 f = dir + "\\" + file_name
 fo = open(f)
 
@@ -77,6 +78,8 @@ for index,value in enumerate(stratum_nodes):
     stratum_nodes_list = stratum_nodes[index].split()
     map_object = map(int, stratum_nodes_list)
     stratum_nodes_int = list(map_object)
+    # add the start node to the end of the list -- close the stratum polygon
+    stratum_nodes_int.append(stratum_nodes_int[0])
     stratum_nodes_int_list.append(stratum_nodes_int)
 #print(stratum_nodes_int_list)
 
@@ -137,7 +140,7 @@ iter_results = len(data["RunData"][0]["Slope results"])
 #print(iter_results)
 
 results_data = []
-result_keys = ["SlipWeight", "Factor", "Disturbing", "Restoring", "Points"]
+result_keys = ["SlipWeight", "X", "Y", "Factor", "Disturbing", "Restoring", "Points"]
 for i in range(iter_results):
     if data["RunData"][0]["Slope results"][i]["Radius"] > 0:
         results_dict = data["RunData"][0]["Slope results"][i]
@@ -147,8 +150,9 @@ for i in range(iter_results):
 results_data_df = pd.DataFrame(results_data)
 
 
-from functions import slope_results_df
-print(slope_results_df(data, iter_results, result_keys))
+from functions_json import slope_results_df
+#print(slope_results_df(data, iter_results, result_keys))
+#print(slope_results_df.__doc__)
 
 
 #-----------------------------------------
