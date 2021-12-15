@@ -158,3 +158,83 @@
 ### JSON NORMALISER
 #------------------------------
 #print(pd.json_normalize(data, record_path="RunData", meta="SlopeMaterials", errors="ignore"))
+
+#------------------------------
+### EXPAND LIST OF DICTS FROM DF
+#------------------------------
+import pandas as pd
+from pandas.core.frame import DataFrame
+file_name = "Slope01_output.json" 
+dir = r"C:\Users\christian.garvey\OneDrive - Arup\01 Documents\01-07 Digital\Python\ukimea-automation-training-2022\Individual_project\individual_project_cgarvey"
+from functions_json import get_json_data
+data = (get_json_data(file_name, dir))
+
+# from functions_json import slope_results_df
+# iter_results = len(data["RunData"][0]["Slope results"])
+# result_keys = ["SlipWeight", "X", "Y", "Factor", "Disturbing", "Restoring", "Points"]
+# slope_output_df = slope_results_df(data, iter_results, result_keys)
+
+# from functions_json import get_arc_intersection_points
+# start_X = get_arc_intersection_points(slope_output_df["Points"], 1, "X") #==> slope_output_df["Point_start_x"]
+
+# slope_output_df["arc_start_x"] = get_arc_intersection_points(slope_output_df["Points"], 1, "X")
+# slope_output_df["arc_start_x"] = get_arc_intersection_points(slope_output_df["Points"], 1, "X")
+
+# print(slope_output_df.head())
+
+
+from functions_json import extract_json_data
+stratum_geometry_df = extract_json_data(data)[0]
+material_data_df = extract_json_data(data)[1]
+print(stratum_geometry_df.head())
+print(material_data_df.head())
+
+from functions_json import rgbint_to_hex
+
+# points_list = []
+# coordinate = "X"
+# for i in stratum_geometry_df['xyz'][0]:
+#     for k,v in i.items():
+#         if k==coordinate:
+#             points_list.append(v)
+# print(points_list)
+# stratum_name = stratum_geometry_df['Name'][0]
+
+# stratum_data = {: points_list}
+
+
+
+# # # Demonstration to extract all x-coordinates for a stratum from the df
+
+# def get_strata_list(df:DataFrame, strata_name:str, coordinate:str):
+#     subset_df = df[df['Name'] == strata_name]
+#     iter = len(subset_df['xyz'][0])
+#     strata_list = [
+#         subset_df['xyz'][0][i][coordinate] for i in range(iter)
+#         ]
+#     return strata_list
+
+# subset_df = stratum_geometry_df[stratum_geometry_df['Name'] == "Sand"]
+# print(subset_df)
+# iter_cell = subset_df.loc[subset_df['Name'] == 'Sand', 'xyz'].iloc[0]
+# iter = len(iter_cell)
+# print(iter)
+# strata_list = [
+#     iter_cell[i]["X"] for i in range(iter)
+#     ]
+# print(strata_list)
+
+from functions_json import get_strata_list
+# clay_x = get_strata_list(stratum_geometry_df, "Clay","X")
+# clay_y = get_strata_list(stratum_geometry_df, "Clay","Y")
+# sand_x = get_strata_list(stratum_geometry_df, "Sand","X")
+# sand_y = get_strata_list(stratum_geometry_df, "Sand","Y")
+# print(clay_y)
+
+stratum_geometry_rgb_df = pd.merge(stratum_geometry_df, material_data_df[["Name", "RGBStratum"]], on="Name", how="left")
+print(stratum_geometry_rgb_df)
+
+
+stratum_geometry_rgb_df["hex_code"] = [rgbint_to_hex(i) for i in stratum_geometry_rgb_df["RGBStratum"]]
+print(stratum_geometry_rgb_df)
+print(stratum_geometry_rgb_df.loc[stratum_geometry_rgb_df["Name"]=="Clay", "hex_code"].iloc[0])
