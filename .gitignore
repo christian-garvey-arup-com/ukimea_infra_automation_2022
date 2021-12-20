@@ -1,3 +1,13 @@
 __pycache__
 .env
 venv
+ss
+__init__.py
+
+#dash
+/dash/__pycache__
+/dash/ss
+
+#json
+/json/__pycache__
+/json/ss
